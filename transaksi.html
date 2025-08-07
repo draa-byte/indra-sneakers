@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaksi | Indra Sneakers</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap');
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #fff;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .form-container, .invoice-container {
+      max-width: 800px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border: 2px solid #d4145a;
+    }
+
+    h2 {
+      text-align: center;
+      background: linear-gradient(to right, #d4145a, #8b00f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    td, th {
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+
+    th {
+      background: #8b00f9;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .btn-group {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .btn {
+      background: linear-gradient(to right, #d4145a, #8b00f9);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 30px;
+      font-size: 1rem;
+      margin: 0 10px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+    }
+
+    .invoice-container {
+      display: none;
+    }
+
+    .invoice-table th, .invoice-table td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .invoice-container, .invoice-container * {
+        visibility: visible;
+      }
+      .invoice-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+      .btn-print {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="form-container" id="form-section">
+  <h2>Form Transaksi Pembelian Sepatu</h2>
+  <form id="form-transaksi">
+    <table>
+      <tr>
+        <td>Nama Lengkap</td>
+        <td><input type="text" name="name" required /></td>
+      </tr>
+      <tr>
+        <td>Produk</td>
+        <td>
+          <table>
+            <tr>
+              <th>Produk</th>
+              <th>Pilih</th>
+              <th>Jumlah</th>
+            </tr>
+            <script>
+              const products = [
+                { name: "NIKE SPORT", price: 500000 },
+                { name: "ORTUSEIGHT", price: 450000 },
+                { name: "FOMO", price: 400000 },
+                { name: "PUMA", price: 480000 },
+                { name: "PG7", price: 520000 },
+                { name: "VERALDO", price: 470000 },
+                { name: "EHEM", price: 390000 },
+                { name: "JUSTLOOK", price: 430000 },
+              ];
+              window.productData = products;
+              document.write(products.map((prod, i) => `
+                <tr>
+                  <td>${prod.name} (Rp ${prod.price.toLocaleString("id-ID")})</td>
+                  <td><input type="checkbox" name="product${i}" value="${prod.name}"></td>
+                  <td>
+                    <select name="qty${i}">
+                      <option value="0">-</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                  </td>
+                </tr>
+              `).join(''));
+            </script>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>Alamat Pengiriman</td>
+        <td><textarea name="alamat" rows="3" required></textarea></td>
+      </tr>
+      <tr>
+        <td>Catatan Tambahan</td>
+        <td><textarea name="keterangan" rows="4"></textarea></td>
+      </tr>
+    </table>
+    <div class="btn-group">
+      <button type="submit" class="btn">Pesan Sekarang</button>
+      <button type="reset" class="btn">Reset</button>
+    </div>
+  </form>
+</div>
+
+<!-- INVOICE SECTION -->
+<div class="invoice-container" id="invoice-section">
+  <h2>Invoice Pemesanan</h2>
+  <p><strong>Nama:</strong> <span id="inv-nama"></span></p>
+  <p><strong>Alamat Pengiriman:</strong> <span id="inv-alamat"></span></p>
+  <p><strong>Catatan:</strong> <span id="inv-catatan"></span></p>
+
+  <h3>Detail Produk:</h3>
+  <table class="invoice-table">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Produk</th>
+        <th>Jumlah</th>
+        <th>Harga Satuan</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody id="invoice-items"></tbody>
+  </table>
+  <p><strong>Total Item:</strong> <span id="total-item"></span></p>
+  <p><strong>Total Pembayaran:</strong> Rp <span id="total-bayar"></span></p>
+
+  <div class="btn-group btn-print">
+    <button class="btn" onclick="window.print()">Cetak Invoice</button>
+  </div>
+</div>
+
+<script>
+  document.getElementById("form-transaksi").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const name = form.name.value;
+    const alamat = form.alamat.value;
+    const catatan = form.keterangan.value;
+
+    const invoiceItems = document.getElementById("invoice-items");
+    invoiceItems.innerHTML = '';
+    let totalItems = 0;
+    let totalBayar = 0;
+
+    productData.forEach((prod, i) => {
+      const checkbox = form[`product${i}`];
+      const qty = parseInt(form[`qty${i}`].value);
+      if (checkbox.checked && qty > 0) {
+        const subtotal = qty * prod.price;
+        totalItems += qty;
+        totalBayar += subtotal;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${invoiceItems.children.length + 1}</td>
+          <td>${prod.name}</td>
+          <td>${qty}</td>
+          <td>Rp ${prod.price.toLocaleString("id-ID")}</td>
+          <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
+        `;
+        invoiceItems.appendChild(row);
+      }
+    });
+
+    if (invoiceItems.children.length === 0) {
+      alert("Silakan pilih setidaknya satu produk dan jumlahnya!");
+      return;
+    }
+
+    document.getElementById("inv-nama").textContent = name;
+    document.getElementById("inv-alamat").textContent = alamat;
+    document.getElementById("inv-catatan").textContent = catatan || "-";
+    document.getElementById("total-item").textContent = totalItems;
+    document.getElementById("total-bayar").textContent = totalBayar.toLocaleString("id-ID");
+
+    document.getElementById("form-section").style.display = "none";
+    document.getElementById("invoice-section").style.display = "block";
+  });
+</script>
+
+</body>
+</html>
